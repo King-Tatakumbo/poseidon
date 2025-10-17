@@ -23,3 +23,37 @@ class Api {
     return [];
   }
 }
+
+static Future<Map<String, dynamic>?> signup(String fullName, String email, String phone, String password) async {
+  try {
+    final resp = await http.post(Uri.parse('$base/api/auth/signup'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'fullName': fullName, 'email': email, 'phone': phone, 'password': password}));
+    if (resp.statusCode == 200) return jsonDecode(resp.body);
+    return null;
+  } catch (err) {
+    print('signup error $err');
+    return null;
+  }
+}
+
+static Future<void> submitKycTier1(String userId, String dob) async {
+  await http.post(Uri.parse('$base/api/kyc/tier1'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'userId': userId, 'dob': dob}));
+}
+
+static Future<void> submitKycTier3(String userId, String bvn) async {
+  await http.post(Uri.parse('$base/api/kyc/tier3'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'userId': userId, 'bvn': bvn}));
+}
+
+static Future<String?> resolveAccount(String accountNumber, String bankCode) async {
+  final resp = await http.get(Uri.parse('$base/api/banks/resolve-account?account_number=$accountNumber&account_bank=$bankCode'));
+  if (resp.statusCode == 200) {
+    final data = jsonDecode(resp.body);
+    return data['data']?['account_name'];
+  }
+  return null;
+}
